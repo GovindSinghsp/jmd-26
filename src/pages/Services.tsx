@@ -25,6 +25,9 @@ const Services = () => {
       description: 'Create the wedding of your dreams with our comprehensive planning services',
       features: ['Venue Selection', 'Vendor Coordination', 'Timeline Management', 'Day-of Coordination'],
       image: 'https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop',
+      link: '/services/wedding-planning',
+      price: 'From $8,000',
+      duration: 'Full Planning'
     },
     {
       icon: Briefcase,
@@ -32,6 +35,9 @@ const Services = () => {
       description: 'Professional corporate events that leave lasting impressions on your clients',
       features: ['Conference Management', 'Team Building Events', 'Product Launches', 'Executive Retreats'],
       image: 'https://images.pexels.com/photos/1190298/pexels-photo-1190298.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop',
+      link: '/services/corporate-events',
+      price: 'From $5,000',
+      duration: 'Multi-Day Events'
     },
     {
       icon: Calendar,
@@ -39,6 +45,19 @@ const Services = () => {
       description: 'Memorable birthday celebrations for all ages, from intimate to grand',
       features: ['Theme Development', 'Entertainment Booking', 'Catering Services', 'Decoration Setup'],
       image: 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop',
+      link: '/services/birthday-parties',
+      price: 'From $2,500',
+      duration: 'All Ages'
+    },
+    {
+      icon: Rocket,
+      title: 'Conference Management',
+      description: 'Professional conference management that delivers impactful experiences',
+      features: ['Speaker Coordination', 'Registration Management', 'AV Setup', 'Networking Sessions'],
+      image: 'https://images.pexels.com/photos/1190298/pexels-photo-1190298.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop',
+      link: '/services/conference-management',
+      price: 'From $8,000',
+      duration: 'Multi-Day'
     },
     {
       icon: Rocket,
@@ -46,6 +65,9 @@ const Services = () => {
       description: 'Launch your products with impact through strategic event experiences',
       features: ['Media Management', 'Influencer Coordination', 'Brand Activation', 'Press Coverage'],
       image: 'https://images.pexels.com/photos/2608517/pexels-photo-2608517.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop',
+      link: '/services/product-launches',
+      price: 'From $12,000',
+      duration: 'Campaign Events'
     },
     {
       icon: Users,
@@ -53,13 +75,9 @@ const Services = () => {
       description: 'Bring people together with perfectly orchestrated social events',
       features: ['Reunion Planning', 'Holiday Parties', 'Networking Events', 'Charity Galas'],
       image: 'https://images.pexels.com/photos/1190297/pexels-photo-1190297.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop',
-    },
-    {
-      icon: Music,
-      title: 'Entertainment Events',
-      description: 'Spectacular entertainment events that captivate and engage audiences',
-      features: ['Concert Production', 'Festival Management', 'Award Shows', 'Cultural Events'],
-      image: 'https://images.pexels.com/photos/1763075/pexels-photo-1763075.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop',
+      link: '/services/social-gatherings',
+      price: 'From $3,500',
+      duration: 'Community Events'
     },
   ];
 
@@ -187,13 +205,23 @@ const Services = () => {
                         <span className="text-2xl font-bold text-[#1f7a8c]">{service.price}</span>
                         <span className="text-sm text-gray-500">{service.duration}</span>
                       </div>
-                      <Link
-                        to="/contact"
-                        className="w-full bg-gradient-to-r from-[#1f7a8c] to-[#022b3a] text-white py-3 rounded-full text-center font-semibold hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
-                      >
-                        <span>Get Quote</span>
-                        <ArrowRight className="h-4 w-4" />
-                      </Link>
+                      {service.link ? (
+                        <Link
+                          to={service.link}
+                          className="w-full bg-gradient-to-r from-[#1f7a8c] to-[#022b3a] text-white py-3 rounded-full text-center font-semibold hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
+                        >
+                          <span>Learn More</span>
+                          <ArrowRight className="h-4 w-4" />
+                        </Link>
+                      ) : (
+                        <Link
+                          to="/contact"
+                          className="w-full bg-gradient-to-r from-[#1f7a8c] to-[#022b3a] text-white py-3 rounded-full text-center font-semibold hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
+                        >
+                          <span>Get Quote</span>
+                          <ArrowRight className="h-4 w-4" />
+                        </Link>
+                      )}
                     </div>
                   </div>
                 </div>

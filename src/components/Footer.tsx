@@ -65,17 +65,20 @@ const Footer = () => {
             <h3 className="text-lg font-semibold text-white">Our Services</h3>
             <ul className="space-y-2">
               {[
-                'Corporate Events',
-                'Wedding Planning',
-                'Birthday Parties',
-                'Conference Management',
-                'Product Launches',
-                'Social Gatherings',
+                { name: 'Corporate Events', path: '/services/corporate-events' },
+                { name: 'Wedding Planning', path: '/services/wedding-planning' },
+                { name: 'Birthday Parties', path: '/services/birthday-parties' },
+                { name: 'Conference Management', path: '/services/conference-management' },
+                { name: 'Product Launches', path: '/services/product-launches' },
+                { name: 'Social Gatherings', path: '/services/social-gatherings' },
               ].map((service) => (
-                <li key={service}>
-                  <span className="text-gray-300 hover:text-[#1f7a8c] transition-colors duration-300 cursor-pointer hover:translate-x-1 inline-block">
-                    {service}
-                  </span>
+                <li key={service.name}>
+                  <Link
+                    to={service.path}
+                    className="text-gray-300 hover:text-[#1f7a8c] transition-colors duration-300 hover:translate-x-1 inline-block"
+                  >
+                    {service.name}
+                  </Link>
                 </li>
               ))}
             </ul>
