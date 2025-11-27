@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Clock, Send, CheckCircle } from 'lucide-react';
+import { supabase, ContactFormData } from '../lib/supabase';
 
 const Contact = () => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ContactFormData>({
     name: '',
     email: '',
     phone: '',
-    eventType: '',
-    eventDate: '',
+    event_type: '',
+    event_date: '',
     guests: '',
     message: '',
   });
@@ -37,15 +38,34 @@ const Contact = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    setTimeout(() => {
+    try {
+      if (!supabase) {
+        console.error('Supabase not configured. Cannot submit form.');
+        return;
+      }
+
+      const { error } = await supabase
+        .from('contact_us')
+        .insert([{
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone || null,
+          event_type: formData.event_type,
+          event_date: formData.event_date || null,
+          guests: formData.guests || null,
+          message: formData.message,
+        }]);
+
+      if (error) throw error;
+
       setIsSubmitting(false);
       setIsSubmitted(true);
       setFormData({
         name: '',
         email: '',
         phone: '',
-        eventType: '',
-        eventDate: '',
+        event_type: '',
+        event_date: '',
         guests: '',
         message: '',
       });
@@ -53,7 +73,10 @@ const Contact = () => {
       setTimeout(() => {
         setIsSubmitted(false);
       }, 5000);
-    }, 1500);
+    } catch (error) {
+      console.error('Error submitting contact form:', error);
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -199,13 +222,13 @@ const Contact = () => {
                   </div>
 
                   <div>
-                    <label htmlFor="eventType" className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label htmlFor="event_type" className="block text-sm font-semibold text-gray-700 mb-2">
                       Event Type *
                     </label>
                     <select
-                      id="eventType"
-                      name="eventType"
-                      value={formData.eventType}
+                      id="event_type"
+                      name="event_type"
+                      value={formData.event_type}
                       onChange={handleChange}
                       required
                       className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-[#1f7a8c] focus:ring-2 focus:ring-[#bfdbf7] transition-colors duration-300 outline-none"
@@ -222,14 +245,14 @@ const Contact = () => {
 
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <label htmlFor="eventDate" className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label htmlFor="event_date" className="block text-sm font-semibold text-gray-700 mb-2">
                       Preferred Date
                     </label>
                     <input
                       type="date"
-                      id="eventDate"
-                      name="eventDate"
-                      value={formData.eventDate}
+                      id="event_date"
+                      name="event_date"
+                      value={formData.event_date}
                       onChange={handleChange}
                       className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-colors duration-300 outline-none"
                     />

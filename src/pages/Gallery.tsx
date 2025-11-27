@@ -1,9 +1,42 @@
-import React, { useState } from 'react';
-import { X, ChevronLeft, ChevronRight, Calendar, Users, MapPin } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { supabase, GalleryItem } from '../lib/supabase';
+import GalleryCard from '../components/gallery/GalleryCard';
+import GalleryModal from '../components/gallery/GalleryModal';
+import GalleryPagination from '../components/gallery/GalleryPagination';
 
 const Gallery = () => {
-  const [selectedImage, setSelectedImage] = useState<number | null>(null);
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
   const [activeCategory, setActiveCategory] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
+
+  useEffect(() => {
+    fetchGalleryItems();
+  }, []);
+
+  const fetchGalleryItems = async () => {
+    try {
+      if (!supabase) {
+        console.warn('Supabase not configured. Using fallback data.');
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('gallery_table')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setGalleryItems(data || []);
+    } catch (error) {
+      console.error('Error fetching gallery items:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const categories = [
     { id: 'all', name: 'All Events' },
@@ -14,122 +47,52 @@ const Gallery = () => {
     { id: 'social', name: 'Social Events' },
   ];
 
-  const galleryItems = [
-    {
-      id: 1,
-      image: 'https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop',
-      title: 'Elegant Garden Wedding',
-      category: 'weddings',
-      description: 'A romantic outdoor wedding with 150 guests featuring floral arrangements and string lights.',
-      date: 'June 2024',
-      guests: '150',
-      location: 'Botanical Gardens'
-    },
-    {
-      id: 2,
-      image: 'https://images.pexels.com/photos/1190298/pexels-photo-1190298.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop',
-      title: 'Tech Conference 2024',
-      category: 'corporate',
-      description: 'Annual technology conference with keynote speakers and networking sessions.',
-      date: 'March 2024',
-      guests: '500',
-      location: 'Convention Center'
-    },
-    {
-      id: 3,
-      image: 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop',
-      title: 'Sweet 16 Celebration',
-      category: 'birthdays',
-      description: 'A glamorous sweet sixteen party with DJ, photo booth, and custom decorations.',
-      date: 'August 2024',
-      guests: '80',
-      location: 'Private Venue'
-    },
-    {
-      id: 4,
-      image: 'https://images.pexels.com/photos/2608517/pexels-photo-2608517.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop',
-      title: 'Product Launch Gala',
-      category: 'launches',
-      description: 'Exclusive product launch event with media coverage and influencer attendance.',
-      date: 'May 2024',
-      guests: '200',
-      location: 'Luxury Hotel'
-    },
-    {
-      id: 5,
-      image: 'https://images.pexels.com/photos/1190297/pexels-photo-1190297.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop',
-      title: 'Charity Fundraiser',
-      category: 'social',
-      description: 'Annual charity gala raising funds for local community programs.',
-      date: 'September 2024',
-      guests: '300',
-      location: 'Grand Ballroom'
-    },
-    {
-      id: 6,
-      image: 'https://images.pexels.com/photos/1763075/pexels-photo-1763075.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop',
-      title: 'Music Festival',
-      category: 'social',
-      description: 'Three-day music festival featuring local and international artists.',
-      date: 'July 2024',
-      guests: '2000',
-      location: 'City Park'
-    },
-    {
-      id: 7,
-      image: 'https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg?auto=compress&cs=tinysrgb&w=800&h=800&fit=crop',
-      title: 'Intimate Beach Wedding',
-      category: 'weddings',
-      description: 'Sunset beach ceremony with close family and friends.',
-      date: 'April 2024',
-      guests: '50',
-      location: 'Seaside Resort'
-    },
-    {
-      id: 8,
-      image: 'https://images.pexels.com/photos/1190298/pexels-photo-1190298.jpeg?auto=compress&cs=tinysrgb&w=800&h=800&fit=crop',
-      title: 'Corporate Retreat',
-      category: 'corporate',
-      description: 'Team building retreat with workshops and outdoor activities.',
-      date: 'October 2024',
-      guests: '100',
-      location: 'Mountain Resort'
-    },
-    {
-      id: 9,
-      image: 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=800&h=800&fit=crop',
-      title: '50th Birthday Bash',
-      category: 'birthdays',
-      description: 'Milestone birthday celebration with live band and gourmet catering.',
-      date: 'November 2024',
-      guests: '120',
-      location: 'Country Club'
-    },
-  ];
-
   const filteredItems = activeCategory === 'all' 
-    ? galleryItems 
+    ? galleryItems
     : galleryItems.filter(item => item.category === activeCategory);
 
-  const openLightbox = (index: number) => {
-    setSelectedImage(index);
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentItems = filteredItems.slice(startIndex, endIndex);
+
+  const openModal = (item: GalleryItem) => {
+    setSelectedItem(item);
   };
 
-  const closeLightbox = () => {
-    setSelectedImage(null);
+  const closeModal = () => {
+    setSelectedItem(null);
   };
 
-  const nextImage = () => {
-    if (selectedImage !== null) {
-      setSelectedImage((selectedImage + 1) % filteredItems.length);
-    }
+  const handleCategoryChange = (category: string) => {
+    setActiveCategory(category);
+    setCurrentPage(1); // Reset to first page when changing category
   };
 
-  const prevImage = () => {
-    if (selectedImage !== null) {
-      setSelectedImage(selectedImage === 0 ? filteredItems.length - 1 : selectedImage - 1);
-    }
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  if (loading) {
+    return (
+      <div className="animate-fadeIn">
+        <section className="relative py-32 bg-gradient-to-br from-[#1f7a8c] via-[#022b3a] to-[#1f7a8c] overflow-hidden">
+          <div className="absolute inset-0 bg-black/20"></div>
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
+              Our
+              <span className="bg-gradient-to-r from-[#bfdbf7] to-[#e1e5f2] bg-clip-text text-transparent">
+                {' '}Gallery
+              </span>
+            </h1>
+            <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-white/30 mx-auto mt-8"></div>
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className="animate-fadeIn">
@@ -163,7 +126,7 @@ const Gallery = () => {
             {categories.map((category) => (
               <button
                 key={category.id}
-                onClick={() => setActiveCategory(category.id)}
+                onClick={() => handleCategoryChange(category.id)}
                 className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 ${
                   activeCategory === category.id
                     ? 'bg-gradient-to-r from-[#1f7a8c] to-[#022b3a] text-white shadow-lg'
@@ -181,113 +144,30 @@ const Gallery = () => {
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredItems.map((item, index) => (
-              <div
+            {currentItems.map((item) => (
+              <GalleryCard
                 key={item.id}
-                className="group cursor-pointer"
-                onClick={() => openLightbox(index)}
-              >
-                <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 group-hover:scale-105">
-                  <div className="aspect-square overflow-hidden relative">
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div className="absolute bottom-4 left-4 right-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <h3 className="text-lg font-bold mb-1">{item.title}</h3>
-                      <p className="text-sm text-white/90">{item.description}</p>
-                    </div>
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">{item.title}</h3>
-                    <p className="text-gray-600 mb-4 line-clamp-2">{item.description}</p>
-                    <div className="flex items-center justify-between text-sm text-gray-500">
-                      <div className="flex items-center space-x-1">
-                        <Calendar className="h-4 w-4" />
-                        <span>{item.date}</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <Users className="h-4 w-4" />
-                        <span>{item.guests} guests</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-1 mt-2 text-sm text-gray-500">
-                      <MapPin className="h-4 w-4" />
-                      <span>{item.location}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                item={item}
+                onClick={() => openModal(item)}
+              />
             ))}
           </div>
+          
+          <GalleryPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
         </div>
       </section>
 
-      {/* Lightbox */}
-      {selectedImage !== null && (
-        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-          <div className="relative max-w-4xl w-full">
-            {/* Close Button */}
-            <button
-              onClick={closeLightbox}
-              className="absolute top-4 right-4 z-10 p-2 bg-white/10 backdrop-blur-sm rounded-full text-white hover:bg-white/20 transition-colors duration-300"
-            >
-              <X className="h-6 w-6" />
-            </button>
-
-            {/* Navigation Buttons */}
-            <button
-              onClick={prevImage}
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 p-2 bg-white/10 backdrop-blur-sm rounded-full text-white hover:bg-white/20 transition-colors duration-300"
-            >
-              <ChevronLeft className="h-6 w-6" />
-            </button>
-            <button
-              onClick={nextImage}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 p-2 bg-white/10 backdrop-blur-sm rounded-full text-white hover:bg-white/20 transition-colors duration-300"
-            >
-              <ChevronRight className="h-6 w-6" />
-            </button>
-
-            {/* Image */}
-            <div className="bg-white rounded-2xl overflow-hidden">
-              <div className="aspect-video">
-                <img
-                  src={filteredItems[selectedImage].image}
-                  alt={filteredItems[selectedImage].title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="p-8">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                  {filteredItems[selectedImage].title}
-                </h3>
-                <p className="text-gray-600 mb-6">
-                  {filteredItems[selectedImage].description}
-                </p>
-                <div className="grid grid-cols-3 gap-4 text-center">
-                  <div>
-                    <Calendar className="h-5 w-5 text-[#1f7a8c] mx-auto mb-2" />
-                    <p className="text-sm text-gray-500">Date</p>
-                    <p className="font-semibold">{filteredItems[selectedImage].date}</p>
-                  </div>
-                  <div>
-                    <Users className="h-5 w-5 text-[#1f7a8c] mx-auto mb-2" />
-                    <p className="text-sm text-gray-500">Guests</p>
-                    <p className="font-semibold">{filteredItems[selectedImage].guests}</p>
-                  </div>
-                  <div>
-                    <MapPin className="h-5 w-5 text-[#1f7a8c] mx-auto mb-2" />
-                    <p className="text-sm text-gray-500">Location</p>
-                    <p className="font-semibold">{filteredItems[selectedImage].location}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* Gallery Modal */}
+      {selectedItem && (
+        <GalleryModal
+          isOpen={!!selectedItem}
+          onClose={closeModal}
+          item={selectedItem}
+        />
       )}
 
       {/* Stats Section */}
@@ -306,7 +186,7 @@ const Gallery = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="text-center">
               <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-[#1f7a8c] to-[#022b3a] bg-clip-text text-transparent mb-2">
-                187+
+                {galleryItems.length}+
               </div>
               <p className="text-gray-600">Events Completed</p>
             </div>
