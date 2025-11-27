@@ -41,7 +41,7 @@ const GalleryModal: React.FC<GalleryModalProps> = ({ isOpen, onClose, item }) =>
 
   return (
     <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-      <div className="relative w-[75%] h-[75%] max-w-7xl">
+      <div className="relative w-[95%] max-w-4xl h-[80vh] md:w-[80%] md:h-[75vh]">
         {/* Close Button */}
         <button
           onClick={onClose}
