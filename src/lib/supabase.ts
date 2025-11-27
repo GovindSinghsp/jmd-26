@@ -58,3 +58,39 @@ export interface HeroClient {
   is_active: boolean;
   created_at: string;
 }
+
+export interface GalleryItem {
+  id: string;
+  image_heading: string;
+  image_text: string;
+  card_heading: string;
+  card_text: string;
+  date: string;
+  guests: string;
+  location: string;
+  image_1: string;
+  image_2?: string;
+  image_3?: string;
+  image_4?: string;
+  image_5?: string;
+  image_6?: string;
+  image_7?: string;
+  image_8?: string;
+  image_9?: string;
+  image_10?: string;
+  category: string;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface ContactFormData {
+  id?: string;
+  name: string;
+  email: string;
+  phone?: string;
+  event_type: string;
+  event_date?: string;
+  guests?: string;
+  message: string;
+  created_at?: string;
+}
